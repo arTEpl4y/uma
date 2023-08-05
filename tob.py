@@ -1,90 +1,79 @@
+from ctypes import windll
+from platform import win32_is_iot
+from tkinter import Image
+from pyautogui import *
+import pyautogui
 import time
-import keyboard
 import numpy as np
 import random
-import autoit
-from ctypes import windll
-from PIL import Image
-import cv2 as cv
 import win32api
 import win32con
 import win32gui
-import win32com
 import win32ui
 
 time.sleep(2)
 # best debugging line known to mankind
 print("helo world")
 
-def savess(hwnd,filename): # take and save screenshot
-    
+def click(x, y):    # click
+    win32api.SetCursorPos((x, y))
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN, 0, 0)
+    time.sleep(np.random.uniform(0.1, 0.35))
+    win32api.mouse_event(win32con.MOUSEEVENTF_LEFTUP, 0, 0)
+
+
+win_uma = win32gui.FindWindow(None, "umamusume")
+
+
+def takescreen(hwnd, width, height, filename):
+    # hwnd is window handle
+    # width, height are in pixels
+    # filename is name of screenshot file
+
     hwndDC = win32gui.GetWindowDC(hwnd)
-    mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
+    mfcDC = win32_is_iot.CreateDCFromHandle(hwndDC)
     saveDC = mfcDC.CreateCompatibleDC()
-   
+
     saveBitMap = win32ui.CreateBitmap()
-    saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)    
-    saveDC.SelectObject(saveBitMap)    
-    result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 3)
+    saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
+    saveDC.SelectObject(saveBitMap)
+    result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 2)
     bmpinfo = saveBitMap.GetInfo()
     bmpstr = saveBitMap.GetBitmapBits(True)
     im = Image.frombuffer(
         'RGB',
         (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
         bmpstr, 'raw', 'BGRX', 0, 1)
-    
+
     win32gui.DeleteObject(saveBitMap.GetHandle())
     saveDC.DeleteDC()
     mfcDC.DeleteDC()
     win32gui.ReleaseDC(hwnd, hwndDC)
 
     if result == 1:
+        # PrintWindow Succeeded
         im.save(filename)
 
-def takess(hwnd):  # show cloned game window using cv2
 
-    hwndDC = win32gui.GetWindowDC(hwnd)
-    mfcDC = win32ui.CreateDCFromHandle(hwndDC)
-    saveDC = mfcDC.CreateCompatibleDC()
+# sample usage
+hwnd = win32gui.FindWindow(None, 'Chrome')
+takescreen(hwnd, 1024, 768, 'screenshot.png')
 
-    saveBitMap = win32ui.CreateBitmap()
-    saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
-    saveDC.SelectObject(saveBitMap)
+# best debugging line known to mankind
+print("helo world")
 
-    windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 3)
-    bmpstr = saveBitMap.GetBitmapBits(True)
+# while keyboard.is_pressed('q') == False:
 
-    img = np.frombuffer(bmpstr, dtype='uint8')
-    img.shape = (height, width, 4)
-
-    win32gui.DeleteObject(saveBitMap.GetHandle())
-    saveDC.DeleteDC()
-    mfcDC.DeleteDC()
-    win32gui.ReleaseDC(hwnd, hwndDC)
-
-    return cv.cvtColor(img, cv.COLOR_RGBA2RGB)
-
-def click(x, y):
-    hWnd = win32gui.FindWindow(None, "umamusume")
-
-    lParam = win32api.MAKELONG(x, y-39)
-
-    win32api.PostMessage(hWnd, win32con.BM_CLICK, win32con.MK_LBUTTON, lParam)
-    time.sleep(0.1)
-    win32api.PostMessage(hWnd, win32con.WM_LBUTTONUP, None, lParam)
+# if pyautogui.locateOnScreen('comparision_pngs/button.png', grayscale=True, confidence=0.7) != None:
+#    click(np.random.randint(852,1053),np.random.randint(854,896))
+#    time.sleep(np.random.uniform(2,7))
 
 # script start
-win_uma = win32gui.FindWindow(None, "umamusume")
-left, top, right, bottom = win32gui.GetWindowRect(win_uma)
-width = right - left - 16
-height = bottom - top - 39
 
-savess(win_uma,"ss.png")
+# training options
 
-while (True):
 
-    ss = takess(win_uma)
-    cv.imshow('cv2 - umamusume', ss)
-    if cv.waitKey(1) == ord('q'):
-        cv.destroyAllWindows()
-        break
+def go_into_train_options():
+    if pyautogui.locateOnScreen('comparision_pngs\button_oguri_train.png', grayscale=True, confidence=0.7) != None:
+        click(np.random.randint(859, 1043), np.random.randint(773, 834))
+        time.sleep(np.random.uniform(3, 8))
